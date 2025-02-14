@@ -5,8 +5,10 @@ import { io } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 
 const ChatRoom = ({ roomId }) => {
-      const socket = useMemo(() => io("https://lovetunes-1.onrender.com"), []);
+    // const socket = useMemo(() => io("https://lovetunes-1.onrender.com"), []);
+    const socket = useMemo(() => io("https://lovebytes-pi.vercel.app"), []);
     // const socket = useMemo(() => io("http://localhost:3001"), []);
+
     const [message, setMessage] = useState("");
     const [chat, setChat] = useState([]);
     const [userId, setUserId] = useState("");
@@ -197,7 +199,7 @@ const ChatRoom = ({ roomId }) => {
 
 
 
-      
+
 
 
 
@@ -210,110 +212,110 @@ const ChatRoom = ({ roomId }) => {
 
     return (
         <>
-       <div className="flex flex-col h-screen w-screen bg-black text-white py-2 relative overflow-hidden overflow-y-hidden">
-    <div className="h-[800px] w-[800px] bg-purple-800 rounded-full blur-3xl opacity-25 absolute bottom-0 -left-32"></div>
-    <audio ref={notificationTone} src="/tone.mp3" preload="auto" />
-    <div className="h-[400px] w-[400px] bg-purple-800 rounded-full blur-3xl opacity-25 absolute top-0 -right-32"></div>
-    <div className="text-white font-semibold text-center py-2 text-sm">
-        <p>{roomUsers.length} users</p>
-        <p>Share code: {roomId}</p>
-    </div>
+            <div className="flex flex-col h-screen w-screen bg-black text-white py-2 relative overflow-hidden overflow-y-hidden">
+                <div className="h-[800px] w-[800px] bg-purple-800 rounded-full blur-3xl opacity-25 absolute bottom-0 -left-32"></div>
+                <audio ref={notificationTone} src="/tone.mp3" preload="auto" />
+                <div className="h-[400px] w-[400px] bg-purple-800 rounded-full blur-3xl opacity-25 absolute top-0 -right-32"></div>
+                <div className="text-white font-semibold text-center py-2 text-sm">
+                    <p>{roomUsers.length} users</p>
+                    <p>Share code: {roomId}</p>
+                </div>
 
-    <div className="max-w-screen-lg w-full mx-auto rounded-xl relative z-10 lg:px-0 px-5">
+                <div className="max-w-screen-lg w-full mx-auto rounded-xl relative z-10 lg:px-0 px-5">
 
-        <div className="flex w-full items-center justify-between lg:py-5 py-2 px-5 bg-purple-600 rounded-xl z-20">
-            <div className="flex items-center space-x-3">
-                {videoId ? (
-                    <div>
-                        <span>{videoTitle?.length > 20 ? videoTitle?.slice(0, 20) : ""}</span>
+                    <div className="flex w-full items-center justify-between lg:py-5 py-2 px-5 bg-purple-600 rounded-xl z-20">
+                        <div className="flex items-center space-x-3">
+                            {videoId ? (
+                                <div>
+                                    <span>{videoTitle?.length > 20 ? videoTitle?.slice(0, 20) : ""}</span>
+                                    <button
+                                        className={`px-4 py-2 ${isPlaying ? "bg-purple-900" : "bg-purple-300"} text-white rounded-lg`}
+                                        onClick={handlePlayPause}
+                                    >
+                                        {isPlaying ? "Pause" : "Play"}
+                                    </button>
+                                </div>
+                            ) : (
+                                <span> No music selected</span>
+                            )}
+                        </div>
+                        <Image src="/music.png" alt="music" width={30} height={30} className="cursor-pointer" onClick={() => setmodal(true)} />
+                    </div>
+
+                    {/* Hidden YouTube player */}
+                    <div id="youtube-player" className="mb-4"></div>
+
+                    {/* Chat */}
+                    <div className="lg:h-[520px] h-[500px] overflow-y-scroll flex flex-col gap-4 py-10 lg:px-8 px-2 rounded-xl z-10" ref={scroll}>
+                        {chat.map((msg, index) => (
+                            <div
+                                key={index}
+                                className={`flex items-center ${msg.senderId === userId ? "justify-end" : "justify-start"}`}
+                            >
+                                {msg.senderId !== userId && (
+                                    <Image
+                                        src="/heart.png"
+                                        alt="User"
+                                        width={40}
+                                        height={40}
+                                        className="mr-2 rounded-full bg-purple-500 p-2"
+                                    />
+                                )}
+                                <div
+                                    className={`py-2 px-4 max-w-xs rounded-lg ${msg.senderId === userId ? "bg-purple-400 text-white" : "bg-purple-600"}`}
+                                >
+                                    {msg.type === "text" && msg.message}
+                                    {msg.type === "media" && (
+                                        <>
+                                            {msg.content?.startsWith("data:image") && (
+                                                <img src={msg.content} alt="Shared media" className="max-w-full rounded-lg" />
+                                            )}
+
+                                            {msg.content?.startsWith("data:video") && (
+                                                <video controls className="max-w-full rounded-lg">
+                                                    <source src={msg.content} type="video/mp4" />
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            )}
+
+                                            {msg.content?.startsWith("blob:") && (
+                                                <>
+                                                    {msg.content?.includes("image") ? (
+                                                        <img src={msg.content} alt="Shared media" className="max-w-full rounded-lg" />
+                                                    ) : msg.content?.includes("video") ? (
+                                                        <video controls className="max-w-full rounded-lg">
+                                                            <source src={msg.content} type="video/mp4" />
+                                                            Your browser does not support the video tag.
+                                                        </video>
+                                                    ) : null}
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Message input */}
+                    <div className="flex flex-row items-center space-x-5">
+                        <input
+                            type="text"
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder="Type a message..."
+                            className="w-full p-3 border border-gray-300 bg-transparent rounded-lg text-white  sm:mb-0"
+                        />
                         <button
-                            className={`px-4 py-2 ${isPlaying ? "bg-purple-900" : "bg-purple-300"} text-white rounded-lg`}
-                            onClick={handlePlayPause}
+                            onClick={() => sendMessage("text")}
+                            className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
                         >
-                            {isPlaying ? "Pause" : "Play"}
+                            Send
                         </button>
                     </div>
-                ) : (
-                    <span> No music selected</span>
-                )}
-            </div>
-            <Image src="/music.png" alt="music" width={30} height={30} className="cursor-pointer" onClick={() => setmodal(true)} />
-        </div>
 
-        {/* Hidden YouTube player */}
-        <div id="youtube-player" className="mb-4"></div>
-
-        {/* Chat */}
-        <div className="lg:h-[520px] h-[500px] overflow-y-scroll flex flex-col gap-4 py-10 lg:px-8 px-2 rounded-xl z-10" ref={scroll}>
-            {chat.map((msg, index) => (
-                <div
-                    key={index}
-                    className={`flex items-center ${msg.senderId === userId ? "justify-end" : "justify-start"}`}
-                >
-                    {msg.senderId !== userId && (
-                        <Image
-                            src="/heart.png"
-                            alt="User"
-                            width={40}
-                            height={40}
-                            className="mr-2 rounded-full bg-purple-500 p-2"
-                        />
-                    )}
-                    <div
-                        className={`py-2 px-4 max-w-xs rounded-lg ${msg.senderId === userId ? "bg-purple-400 text-white" : "bg-purple-600"}`}
-                    >
-                        {msg.type === "text" && msg.message}
-                        {msg.type === "media" && (
-                            <>
-                                {msg.content?.startsWith("data:image") && (
-                                    <img src={msg.content} alt="Shared media" className="max-w-full rounded-lg" />
-                                )}
-
-                                {msg.content?.startsWith("data:video") && (
-                                    <video controls className="max-w-full rounded-lg">
-                                        <source src={msg.content} type="video/mp4" />
-                                        Your browser does not support the video tag.
-                                    </video>
-                                )}
-
-                                {msg.content?.startsWith("blob:") && (
-                                    <>
-                                        {msg.content?.includes("image") ? (
-                                            <img src={msg.content} alt="Shared media" className="max-w-full rounded-lg" />
-                                        ) : msg.content?.includes("video") ? (
-                                            <video controls className="max-w-full rounded-lg">
-                                                <source src={msg.content} type="video/mp4" />
-                                                Your browser does not support the video tag.
-                                            </video>
-                                        ) : null}
-                                    </>
-                                )}
-                            </>
-                        )}
-                    </div>
                 </div>
-            ))}
-        </div>
-
-        {/* Message input */}
-        <div className="flex flex-row items-center space-x-5">
-            <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="w-full p-3 border border-gray-300 bg-transparent rounded-lg text-white  sm:mb-0"
-            />
-            <button
-                onClick={() => sendMessage("text")}
-                className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
-            >
-                Send
-            </button>
-        </div>
-
-    </div>
-</div>
+            </div>
 
 
             {
